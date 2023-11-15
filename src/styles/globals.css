@@ -1,3 +1,78 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+    font-family: 'AP-Regular';
+    src: url('/fonts/AeonikTRIAL-Regular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'AP-Bold';
+    src: url('/fonts/AeonikProTRIAL-Bold.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'AP-Black';
+    src: url('/fonts/AeonikProTRIAL-Black.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'AP-ExtraBold';
+    src: url('/fonts/AeonikProTRIAL-ExtraBold.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'AP-Light';
+    src: url('/fonts/AeonikProTRIAL-Light.otf') format('opentype');
+}
+
+
+body {
+    font-family: AP-Regular;
+}
+
+button {
+    user-select: none;
+    -webkit-tap-highlight-color: transparent; 
+	-webkit-touch-callout: none; /* iOS Safari */
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	touch-action: manipulation; /* Optimize For Mobile */
+    transition: all 0.2s ease-in-out;
+}
+
+.important-btn {
+    position: relative;
+    width: 168px;
+    height: 45px;
+    border: 1.6px solid #2B2B2D;
+    color: rgb(243, 243, 243);
+    font-family: AP-Regular;
+    letter-spacing: .5px;
+    font-size: 14px;
+    background: linear-gradient(179.28deg, #7E7C81 0.62%, #414247 4.64%, #3F4045 8.57%, #3C3D42 17.26%, #3B3A40 28.22%, #39383E 39.18%, #313035 57.36%, #2C2B30 74.33%, #1E1E20 93.03%);
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.35), inset 0px 3.5px 3px #7C7B80, inset 0px -4px 3px #0C0C0E;
+    border-radius: 11px;
+}
+
+.interactive:active {
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.35), inset 0px 3.5px 10px #7C7B8088, inset 0px -2px 3px #0C0C0E;
+}
+
+.floating-alert-w-anim {
+    opacity: .2;
+    transform: translateY(-7px);
+    animation: floating-alert .2s ease-out forwards;
+}
+
+@keyframes floating-alert {
+    100% {
+        opacity: 1;
+        transform: translateY(0px);
+    }
+}
