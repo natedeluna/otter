@@ -8,12 +8,24 @@ import FloatingAlert from "~/_components/floating_alert";
 import { useState } from "react";
 
 export default function Home() {
-  const hello = api.post.hello.useQuery({ text: "from tRPC" });
+  const calcom = api.calcom.getBookings.useQuery(undefined,{
+    enabled: false,
+  });
   const [showAlert, setShowAlert] = useState(false);
   const [msg, setMsg] = useState("Hello World");
 
-  const handleBtnClick = () => {
-    setShowAlert(setShowAlert => !setShowAlert);
+  const handleBtnClick = async () => {
+    try {
+      const trpcmsg = await calcom.refetch();
+      if (trpcmsg.data) {
+        const description = trpcmsg.data?.bookings[0]?.description;
+        setMsg(description);
+
+      }
+      setShowAlert(setShowAlert => !setShowAlert);
+    } catch (error) {
+      console.error(error);
+    }
   };
   return (
     <>
