@@ -8,18 +8,22 @@ import FloatingAlert from "~/_components/floating_alert";
 import { useState } from "react";
 
 export default function Home() {
-  const calcom = api.calcom.getBookings.useQuery(undefined,{
+  const calcom = api.calcom.createOtterMasterSchedule.useQuery(undefined,{
     enabled: false,
   });
   const [showAlert, setShowAlert] = useState(false);
-  const [msg, setMsg] = useState("Hello World");
+  const [msg, setMsg] = useState<Array<any>>([]);
+
+  const formatStartEndTime = (start: string, end: string) => {
+
+  };
 
   const handleBtnClick = async () => {
     try {
       const trpcmsg = await calcom.refetch();
       if (trpcmsg.data) {
-        const description = trpcmsg.data?.bookings[0]?.description;
-        setMsg(description);
+        console.log(trpcmsg.data)
+        // setMsg(trpcmsg.data);
 
       }
       setShowAlert(setShowAlert => !setShowAlert);
