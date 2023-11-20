@@ -76,3 +76,7 @@ button {
         transform: translateY(0px);
     }
 }
+
+a {
+    all:unset;
+}

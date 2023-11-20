@@ -11,8 +11,27 @@ import { api } from '~/utils/api';
 const apiKey = process.env.CALCOM_API_KEY;
 let masterScheduleId: Number = 0;
 let defaultAvaialbiltyId: Number = 0;
-let availabilityId: Number = 0;
+let eventId: Number = 0;
+let baseEventUrl: String;
 export const calcomRouter = createTRPCRouter({
+    getUser: publicProcedure
+    .query(async() => {
+        const res = await fetch(`https://api.cal.com/v1/users?apiKey=${apiKey}`,{
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        if (!res.ok) {
+            console.log('failed on get user');
+            // throw new Error('Failed to fetch Cal.com events');
+        }
+        const data = await res.json();
+        const userId = data.users[0].username;
+        baseEventUrl = 'https://cal.com/';
+        baseEventUrl = baseEventUrl + userId + '/';
+        return data;
+        }),
     createOtterMasterSchedule: publicProcedure
     .query(async() => {
             const requestBody = {
@@ -56,9 +75,9 @@ export const calcomRouter = createTRPCRouter({
     .query(async() => {
         const requestBody = {
             "days": [0,1,2,3,4,5,6],
-            "startTime": "1970-01-01T00:00:00.000Z",
+            "startTime": "1970-01-01T09:00:00.000Z",
             "scheduleId": masterScheduleId,
-            "endTime": "1970-01-01T23:30:00.000Z",
+            "endTime": "1970-01-01T12:30:00.000Z",
         };
         const res = await fetch(`https://api.cal.com/v1/availabilities?apiKey=${apiKey}`,{
             method: 'POST',
@@ -72,8 +91,6 @@ export const calcomRouter = createTRPCRouter({
             // throw new Error('Failed to fetch Cal.com events');
         }
         const data = await res.json();
-        console.log(data, "data");
-        availabilityId = data.availability.id;
         return data;
         }),
     createOtterEventType: publicProcedure //Final step
@@ -97,6 +114,11 @@ export const calcomRouter = createTRPCRouter({
                 // throw new Error('Failed to fetch Cal.com events');
             }
             const data = await res.json();
-            return data;
+            // eventId = data.event_type.id;
+            let returnData = {
+                data: data,
+                baseEventUrl: baseEventUrl,
+            }
+            return returnData;
         }),
 });

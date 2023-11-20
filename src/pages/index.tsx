@@ -7,11 +7,33 @@ import { api } from "~/utils/api";
 import { useMutation } from "@tanstack/react-query";
 import FloatingAlert from "~/_components/floating_alert";
 import { useState } from "react";
-import { retryDelay } from "node_modules/@trpc/client/dist/internals/retryDelay";
+import { useQuery } from "@tanstack/react-query";
+import { escape } from "querystring";
+import { string } from "zod";
 
-export default function Home() {
+export default function Home()  {
   const [showAlert, setShowAlert] = useState(false);
-  const [msg, setMsg] = useState<Array<any>>([]);
+  const [preview, setPreview] = useState<String>();
+  const [href, setHref] = useState<String>();
+  const [maxDaysOut, setMaxDaysOut] = useState(7);
+  const [startTime, setStartTime] = useState("09:00");
+  const [endTime, setEndTime] = useState("17:00");
+
+
+  const user =  api.calcom.getUser.useQuery(undefined, {
+    staleTime: 1000 * 60 * 5, // Data is fresh for 5 minutes
+    cacheTime: 1000 * 60 * 60 * 24, // Data stays in cache for 1 day
+    enabled: true, // You can set this based on a condition
+  });
+  const getUser = async () => {
+    return await user.refetch();
+  };
+  if (!user.data) {
+    console.log("user was not fetched, doing it now");
+    getUser();
+  } else {
+    console.log("user was already fetched", user.data);
+  }
 
   const createOtterMasterSchedule = api.calcom.createOtterMasterSchedule.useQuery(undefined, { enabled: false, retry: false });
   const removeDefaultAvailability = api.calcom.removeDefaultAvailability.useQuery(undefined, { enabled: false, retry: false});
@@ -19,18 +41,25 @@ export default function Home() {
   const createOtterEventType = api.calcom.createOtterEventType.useQuery(undefined, { enabled: false, retry: false });
 
 
-  const handleBtnClick = async () => {
+  const createEvent = async () => {
     try {
       const step1 = await createOtterMasterSchedule.refetch();
       if (step1.isSuccess) {
-        console.log("master schedule created", step1.data);
+        await delay(1000);
         const step2 = await removeDefaultAvailability.refetch();
         if (step2.isSuccess) {
-          console.log("default availability removed", step2.data);
+          await delay(1000);
           const step3 = await assignGlobalAvailability.refetch();
           if (step3.isSuccess) {
+            await delay(1000);
             const step4 = await createOtterEventType.refetch();
-            console.log("event created", step3.data);
+            if (step4.isSuccess) {
+              await delay(5000);
+              const eventLink = `${step4.data.baseEventUrl}${step4.data.data.event_type.slug}`;
+              setPreview(step4.data.data.event_type.slug);
+              setHref(eventLink);
+              setShowAlert(true);
+            }
             console.log("%c booking defined", "background: crimson; color: fuchsia; font-size: 16px; padding: 4px;");
           }
         }
@@ -40,20 +69,38 @@ export default function Home() {
     }
   };
 
+  function delay(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   return (
     <>
+    
         <Head>
           <title>Otter</title>
           <meta name="description" content="Create Events Lighting Quick" />
           <link rel="icon" href="/favicon.ico" />
         </Head>
-        <main className="flex min-h-screen flex-col items-center justify-center">
+        <main className="flex min-h-screen flex-col items-center justify-center gap-5">
+          
+          <div className="flex flex-col gap-3">
+            <input placeholder="Unlimited Days Out" className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"></input>
+            <input 
+              placeholder="Start Time - 9:00AM" 
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              onChange={(e) => {setStartTime(e.target.value);}}></input>
+            <input 
+              placeholder="End Time - 12:30PM" 
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              onChange={(e) => {setEndTime(e.target.value);}}
+              ></input>
+          </div>
           <button 
-          onClick={() => {handleBtnClick();}}
+          onClick={() => {createEvent();}}
           className="important-btn interactive"
           >Otter</button>
           <div className="h-[200px] w-full flex flex-col content-center items-center py-7">
-          {showAlert && <FloatingAlert message={msg} />}
+          {showAlert && <FloatingAlert preview={preview} href={href} />}
           </div>
       </main>
       </>
