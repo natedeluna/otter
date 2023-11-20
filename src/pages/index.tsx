@@ -51,7 +51,7 @@ export default function Home()  {
             await delay(1000);
             const step4 = await createOtterEventType.refetch();
             if (step4.isSuccess) {
-              await delay(5000);
+              await delay(7000);
               const eventLink = `${step4.data.baseEventUrl}${step4.data.data.event_type.slug}`;
               setPreview(step4.data.data.event_type.slug);
               setHref(eventLink);

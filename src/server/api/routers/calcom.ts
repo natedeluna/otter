@@ -22,17 +22,27 @@ export const calcomRouter = createTRPCRouter({
                 'Content-Type': 'application/json',
             },
         });
-        if (!res.ok) {
-            console.log('failed on get user');
-            // throw new Error('Failed to fetch Cal.com events');
+        if (res.ok && res.status === 200) {
+            try {
+                const data = await res.json();
+        
+                if (Array.isArray(data.users) && data.users.length > 0) {
+                    console.log('success on get user');
+                    console.log(data);
+                    const userId = data.users[0].username;
+                    baseEventUrl = `https://cal.com/${userId}/`;
+                    return data;
+                } else {
+                    throw new Error('No users found in the response');
+                }
+            } catch (error) {
+                console.error('Error parsing JSON:', error);
+                throw new Error('Failed to parse response as JSON');
+            }
+        } else {
+            console.error(`HTTP Error: ${res.status}`);
+            throw new Error('Failed to fetch Cal.com events');
         }
-        const data = await res.json();
-        await delay(1000);
-        console.log(data);
-        const userId = data.users[0].username;
-        baseEventUrl = 'https://cal.com/';
-        baseEventUrl = baseEventUrl + userId + '/';
-        return data;
         }),
     createOtterMasterSchedule: publicProcedure
     .query(async() => {
