@@ -21,20 +21,17 @@ export default function Home()  {
 
 
   const user =  api.calcom.getUser.useQuery(undefined, {
-    staleTime: 1000 * 60 * 5, // Data is fresh for 5 minutes
-    cacheTime: 1000 * 60 * 60 * 24, // Data stays in cache for 1 day
     enabled: true, // You can set this based on a condition
   });
   const getUser = async () => {
     return await user.refetch();
   };
-  if (!user.data) {
-    console.log("user was not fetched, doing it now");
-    getUser();
-  } else {
-    console.log("user was already fetched", user.data);
-  }
-
+  getUser().then((data) => {
+    console.log(data.data);
+  })
+  .catch((error) => {
+    console.error(error);
+  });
   const createOtterMasterSchedule = api.calcom.createOtterMasterSchedule.useQuery(undefined, { enabled: false, retry: false });
   const removeDefaultAvailability = api.calcom.removeDefaultAvailability.useQuery(undefined, { enabled: false, retry: false});
   const assignGlobalAvailability = api.calcom.assignGlobalAvailability.useQuery(undefined, { enabled: false, retry: false });

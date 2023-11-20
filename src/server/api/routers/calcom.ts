@@ -27,6 +27,8 @@ export const calcomRouter = createTRPCRouter({
             // throw new Error('Failed to fetch Cal.com events');
         }
         const data = await res.json();
+        await delay(1000);
+        console.log(data);
         const userId = data.users[0].username;
         baseEventUrl = 'https://cal.com/';
         baseEventUrl = baseEventUrl + userId + '/';
@@ -122,3 +124,7 @@ export const calcomRouter = createTRPCRouter({
             return returnData;
         }),
 });
+
+function delay (ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
