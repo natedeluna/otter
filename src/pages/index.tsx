@@ -10,6 +10,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { escape } from "querystring";
 import { string } from "zod";
+import TimeSelectionSlider from "~/_components/time_selection_slider";
 
 export default function Home()  {
   const [showAlert, setShowAlert] = useState(false);
@@ -20,18 +21,17 @@ export default function Home()  {
   const [endTime, setEndTime] = useState("17:00");
 
 
-  const user =  api.calcom.getUser.useQuery(undefined, {
-    enabled: true, // You can set this based on a condition
-  });
-  const getUser = async () => {
-    return await user.refetch();
-  };
-  getUser().then((data) => {
-    console.log(data.data);
-  })
-  .catch((error) => {
-    console.error(error);
-  });
+  // const user =  api.calcom.getUser.useQuery(undefined, {
+  //   enabled: true, // You can set this based on a condition
+  // });
+  // const getUser = async () => {
+  //   return await user.refetch();
+  // };
+  // getUser().then((data) => {
+  // })
+  // .catch((error) => {
+  //   console.error(error);
+  // });
   const createOtterMasterSchedule = api.calcom.createOtterMasterSchedule.useQuery(undefined, { enabled: false, retry: false });
   const removeDefaultAvailability = api.calcom.removeDefaultAvailability.useQuery(undefined, { enabled: false, retry: false});
   const assignGlobalAvailability = api.calcom.assignGlobalAvailability.useQuery(undefined, { enabled: false, retry: false });
@@ -81,6 +81,7 @@ export default function Home()  {
         <main className="flex min-h-screen flex-col items-center justify-center gap-5">
           
           <div className="flex flex-col gap-3">
+          <TimeSelectionSlider />
             <input placeholder="Unlimited Days Out" className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"></input>
             <input 
               placeholder="Start Time - 9:00AM" 
