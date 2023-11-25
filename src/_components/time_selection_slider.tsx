@@ -27,10 +27,16 @@ const TimeSelectionSlider: React.FC<TimeSelectionSliderProps> = (props) => {
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         const mouseMovingUp = (elementYPosition > e.clientY - timeContainerRect.top-10);
+        let slider = document.querySelector('.timeSelectionSlider');
         if (mouseMovingUp) {
             let newYPos = Math.max(e.clientY - timeContainerRect.top-10, 5);
             setElementYPosition(newYPos);
-            setElementHeight(elementHeight - e.movementY);
+            let height = parseFloat(slider?.style.height)
+            if (slider && slider.style) {
+                slider.style.height = `${height - e.movementY}px`;
+            }
+            // setElementHeight(elementHeight - e.movementY);
+            return
         }
         let newHeight = e.clientY - timeContainerRect.top - elementYPosition;
         const maxHeight = timeContainerRect.height - (elementYPosition+15);
@@ -67,7 +73,7 @@ const TimeSelectionSlider: React.FC<TimeSelectionSliderProps> = (props) => {
             {/* <div className='absolute top-0 left-0'>{yPos}</div> */}
             {isTimeBlockMounted && (
                 <div
-                    className={`bg-fuchsia-200 rounded-xl border-fuchsia-100 border-4 transition duration-200 ${isMouseDown ? 'shadow-xl' : 'shadow-sm'}`}
+                    className={`timeSelectionSlider bg-fuchsia-200 rounded-xl border-fuchsia-100 border-4 transition duration-200 ${isMouseDown ? 'shadow-xl' : 'shadow-sm'}`}
                     style={{
                         position: 'relative',
                         left: 0,
