@@ -32,6 +32,8 @@
 
 body {
     font-family: AP-Regular;
+    overflow: hidden;
+    user-select: none;
 }
 
 button {
