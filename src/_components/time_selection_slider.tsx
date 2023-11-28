@@ -14,15 +14,16 @@ const TimeSelectionBlock: React.FC = ({ elementYPosition, timeBlockHeight, isMou
             left: 0,
             top: `${elementYPosition}px`,
             width: '100%',
-            minHeight: `${timeBlockHeight}px`,
+            height: `${timeBlockHeight}px`,
+            minHeight: `40px`,
         }}>
-            <div className='resize-top absolute flex items-center w-full justify-center h-5 opacity-0 transition duration-200 hover:opacity-100  '>
-                <div className='relative bg-[#f9e2ff] h-[5px] w-[20%] rounded-md'></div>
+            <div className='resize-top absolute flex items-center w-full justify-center h-5 opacity-0 transition duration-500 hover:opacity-60 active:opacity-100 cursor-pointer '>
+                <div className='pointer-events-none relative bg-[#e69bf9] h-[5px] w-[20%] rounded-md'></div>
             </div>
-            <div className='resize-bottom absolute bottom-0 left-0 flex items-center w-full justify-center h-5 opacity-0 transition duration-200 hover:opacity-100  '>
-                <div className='relative bg-[#f9e2ff] h-[5px] w-[20%] rounded-md'></div>
+            <div className='resize-bottom absolute bottom-0 left-0 flex items-center w-full justify-center h-5 opacity-0 transition duration-500 hover:opacity-60 active:opacity-100 cursor-pointer '>
+                <div className='pointer-events-none relative bg-[#e798fb] h-[5px] w-[20%] rounded-md'></div>
             </div>
-        <div className="removeTimeBlock absolute right-0 top-0 m-2 hover:border-fuchsia-900 text-fuchsia-900 text-xs cursor-pointer transition duration-300">remove</div>
+        {/* <div className="removeTimeBlock absolute right-0 top-0 m-2 hover:border-fuchsia-900 text-fuchsia-900 text-xs cursor-pointer transition duration-300">remove</div> */}
     </div>
     );
 }
@@ -32,33 +33,31 @@ const TimeSelectionSlider: React.FC<TimeSelectionSliderProps> = (props) => {
     const [isMouseDown, setIsMouseDown] = useState(false);
     const [isMouseUp, setIsMouseUp] = useState(true);
     const [elementYPosition, setElementYPosition] = useState(0);
-    const [elementHeight, setElementHeight] = useState(20);
+    const [elementHeight, setElementHeight] = useState(40);
     const [timeContainerRect, setTimeContainerRect] = useState({} as DOMRect);
     const [mouseDownAnchor, setMouseDownAnchor] = useState(0);
-    const [timeBlockHeight, setTimeBlockHeight] = useState(20);
+    const [timeBlockHeight, setTimeBlockHeight] = useState(40);
     const [moveTimeBlock, setMoveTimeBlock] = useState(false);
-    const [resizeTimeBlock, setResizeTimeBlock] = useState(false);
+    const [resizeTimeBlock, setResizeTimeBlock] = useState<String>('');
 
     const handleMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         const t = e.target as HTMLDivElement;
         setIsMouseDown(true);
         setIsMouseUp(false);
         setTimeContainerRect(e.currentTarget.getBoundingClientRect());
-        if (t == document.querySelector('.timeSelectionSlider')) {
-            console.log('move time block');
-            setMouseDownAnchor(e.clientY);
-            setMoveTimeBlock(true);
-            return;
-        }
 
-        if (t== document.querySelector('.resize-top') || t == document.querySelector('.resize-bottom')) {
-            setMoveTimeBlock(false);
-            setResizeTimeBlock(true);
-            return;
+        if (t == document.querySelector('.resize-top') || t == document.querySelector('.resize-bottom')) {
+            t == document.querySelector('.resize-top') ? setResizeTimeBlock('top') : setResizeTimeBlock('bottom');
+            return
         }
         if (t == document.querySelector('.removeTimeBlock')) {
             document.querySelector('.timeSelectionSlider').remove();
             return;
+        }
+
+        if (t == document.querySelector('.timeSelectionSlider')) {
+            setMoveTimeBlock(true);
+            return
         }
         setShowTimeBlock(true);
         setMouseDownAnchor(e.clientY);
@@ -69,24 +68,10 @@ const TimeSelectionSlider: React.FC<TimeSelectionSliderProps> = (props) => {
     };
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-        if (resizeTimeBlock) {
-            return
-        }
+        if (moveTimeBlock)  return shiftTimeBlock(e);
 
-        if (moveTimeBlock) {
-            let slider = document.querySelector('.timeSelectionSlider');
-            let currentTop = parseFloat(slider.style.top);
-            let currentHeight = parseFloat(slider.style.height);
-            let finalTop = currentTop + e.movementY;
-            let maxTop = (timeContainerRect.height-20) - currentHeight;
+        if (resizeTimeBlock) return resizeTimeBlockTop(e);
 
-            if (finalTop < 6) {finalTop = 6;};
-            if (finalTop > maxTop) {finalTop = maxTop};
-
-            slider.style.top = `${finalTop}px`;
-
-            return;
-        }
         const mouseMovingUp = (elementYPosition > e.clientY - timeContainerRect.top-10);
         let slider = document.querySelector('.timeSelectionSlider');
         if (mouseMovingUp && timeContainerRect.top+15 < e.clientY) {
@@ -103,6 +88,43 @@ const TimeSelectionSlider: React.FC<TimeSelectionSliderProps> = (props) => {
         slider.style.height = `${newHeight}px`;
     };
 
+    const shiftTimeBlock = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        let slider = document.querySelector('.timeSelectionSlider');
+        let currentTop = parseFloat(slider.style.top);
+        let currentHeight = parseFloat(slider.style.height);
+        let finalTop = currentTop + e.movementY;
+        let maxTop = (timeContainerRect.height-20) - currentHeight;
+        if (finalTop < 6) {finalTop = 6;};
+        if (finalTop > maxTop) {finalTop = maxTop};
+        slider.style.top = `${finalTop}px`;
+    }
+
+    const resizeTimeBlockTop = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        let slider = document.querySelector('.timeSelectionSlider');
+        if (resizeTimeBlock == 'top') {
+            let currentTop = parseFloat(slider.style.top);
+            let currentHeight = parseFloat(slider.style.height);
+            let finalTop = currentTop + e.movementY;
+            let finalHeight = currentHeight - e.movementY;
+            let maxTop = (timeContainerRect.height-20) - currentHeight;
+            if (finalTop < 6) {finalTop = 6;};
+            if (finalTop > maxTop) {finalTop = maxTop};
+            if (finalHeight < 40) {finalHeight = 40};
+            slider.style.top = `${finalTop}px`;
+            slider.style.height = `${finalHeight}px`;
+            return
+        }
+        if (resizeTimeBlock == 'bottom') {
+            console.log('running')
+            let currentHeight = parseFloat(slider.style.height);
+            let finalHeight = currentHeight + e.movementY;
+            console.log(parseFloat(slider?.style.top));
+            if (finalHeight + parseFloat(slider?.style.top) < (currentHeight + parseFloat(slider?.style.top))) {finalHeight = currentHeight};
+            slider.style.height = `${finalHeight}px`;
+            return
+        }
+    }
+
     useEffect(() => {
         const handleMouseUp = () => {
             let slider = document.querySelector('.timeSelectionSlider');
@@ -112,7 +134,7 @@ const TimeSelectionSlider: React.FC<TimeSelectionSliderProps> = (props) => {
             setTimeBlockHeight(height);
             setIsMouseDown(false);
             setMoveTimeBlock(false);
-            setResizeTimeBlock(false);
+            setResizeTimeBlock(null);
             window.removeEventListener('pointerup', handleMouseUp);
         };
         if (isMouseDown) {
@@ -133,7 +155,7 @@ const TimeSelectionSlider: React.FC<TimeSelectionSliderProps> = (props) => {
                         {showTimeBlock && (
                 <TimeSelectionBlock 
                 elementYPosition={elementYPosition}
-                timeBlockHeight={elementHeight}
+                timeBlockHeight={timeBlockHeight}
                 isMouseDown={isMouseDown}
                 />
             )}
