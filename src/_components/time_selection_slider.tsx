@@ -42,6 +42,22 @@ const TimeSelectionSlider: React.FC<TimeSelectionSliderProps> = (props) => {
     const [moveTimeBlock, setMoveTimeBlock] = useState(false);
     const [resizeTimeBlock, setResizeTimeBlock] = useState<String>('');
     const [timeBlocks, setTimeBlocks] = useState([]);
+    const[timeMatrixBreakPoints, setTimeMatrixBreakPoints] = useState([{ hour: "", breakpoint: 0 }]);
+
+    useEffect(() => {
+        const timeContainerHeight = document.querySelector('.timeSelectionContainer').getBoundingClientRect().height;
+        const heightPerSegment = timeContainerHeight / 24;
+        let breakpoints = [];
+    
+        for (let i = 0; i < 24; i++) {
+            breakpoints.push({
+                hour: `${i}:00`,
+                breakpoint: heightPerSegment * (i + 1)
+            });
+        }
+    
+        setTimeMatrixBreakPoints(breakpoints);
+    }, []);
 
     const handleMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         const t = e.target as HTMLDivElement;
@@ -139,7 +155,7 @@ const TimeSelectionSlider: React.FC<TimeSelectionSliderProps> = (props) => {
             let currentHeight = parseFloat(slider.style.height);
             let finalHeight = currentHeight + e.movementY;
             if (e.movementY > 0)    {
-                timeContainerRect.height < slider.getBoundingClientRect().top + currentHeight + 15 ? finalHeight = currentHeight : null;
+                timeContainerRect.height < slider.getBoundingClientRect().top + slider.getBoundingClientRect().height ? finalHeight = currentHeight : null;
             }
             slider.style.height = `${finalHeight}px`;
             return
@@ -169,10 +185,18 @@ const TimeSelectionSlider: React.FC<TimeSelectionSliderProps> = (props) => {
   
   return (
     <div 
-        className='w-full mt-5 rounded-xl bg-zinc-50 border-spacing-1 h-[300px] py-2 px-4 timeSelectionContainer'
+        className='w-full mt-5 relative rounded-xl bg-zinc-100 border-spacing-1 h-[300px] py-2 px-4 timeSelectionContainer'
         onPointerDown={handleMouseDown}
         onPointerMove={isMouseDown ? handleMouseMove: undefined}
         >
+            <div 
+                id='timeAxis'
+                className='h-[90%] text-xs text-zinc-400 flex flex-col justify-between left-[-35px] transform -translate-y-1/2 top-1/2  rounded-sm absolute '
+            >
+                <div>00:00</div>
+                <div className='text-zinc-800' >12:00</div>
+                <div>24:00</div>
+            </div>
             {timeBlocks.map((block) => block)}
     </div>
   );
